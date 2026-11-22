@@ -80,14 +80,3 @@ If you find this work useful, please cite our paper:
   year      = {2027}
 }
 ```
-
-If you use the evaluation code, please also cite Model Spider:
-
-```bibtex
-@inproceedings{zhang2023model,
-  title     = {Model Spider: Learning to Rank Pre-Trained Models Efficiently},
-  author    = {Zhang, Yi-Kai and Huang, Ting-Ji and Ding, Yao-Xiang and Zhan, De-Chuan and Ye, Han-Jia},
-  booktitle = {Advances in Neural Information Processing Systems (NeurIPS)},
-  year      = {2023}
-}
-```
