@@ -1,0 +1,128 @@
+{
+  "_comment": "Painting -> Sketch (DomainNet). Fill in every empty path under 'paths' before running. Keys starting with '_' are comments and are ignored by the scripts.",
+
+  "dataset": "domainnet",
+  "source_domain": "painting",
+  "target_domain": "sketch",
+  "seed": 8848,
+  "device": "cuda",
+
+  "paths": {
+    "_comment": "PUT THE REQUIRED PATHS HERE. All paths are absolute.",
+
+    "_source_dir": "Labeled source (painting) images, one subfolder per class. Used by source_to_target.py.",
+    "source_dir": "",
+
+    "_target_dir": "Unlabeled target (sketch) images. Used by generate_tags.py and finetune_diffusion.py.",
+    "target_dir": "",
+
+    "_tags_path": "JSON file for the sketch attribute dictionary. Written by generate_tags.py, read by source_to_target.py.",
+    "tags_path": "",
+
+    "_finetuned_model_save_dir": "SAVE path: folder where finetune_diffusion.py saves the finetuned model (final LoRA weights plus checkpoint-N subfolders).",
+    "finetuned_model_save_dir": "",
+
+    "_finetuned_model_load_path": "LOAD path: saved finetuned model that source_to_target.py loads for generation. Usually the same folder as finetuned_model_save_dir, or one of its checkpoint-N subfolders, or a weights file.",
+    "finetuned_model_load_path": "",
+
+    "_output_dir": "Folder where source_to_target.py saves the generated sketch images and prompts.json.",
+    "output_dir": ""
+  },
+
+  "target_subset": {
+    "_comment": "Fraction of the unlabeled target images used for tag extraction and LoRA finetuning. 0.01 = 1% (paper setting for DomainNet). The same seeded subset is used by both scripts.",
+    "fraction": 0.01,
+    "max_images": null
+  },
+
+  "models": {
+    "vlm_id": "vikhyatk/moondream2",
+    "vlm_revision": "2025-06-21",
+    "llm_id": "meta-llama/Llama-3.1-8B-Instruct",
+    "sd_id": "stabilityai/stable-diffusion-xl-base-1.0",
+    "vae_id": "madebyollin/sdxl-vae-fp16-fix",
+    "controlnets": {
+      "canny": "diffusers/controlnet-canny-sdxl-1.0",
+      "depth": "diffusers/controlnet-depth-sdxl-1.0-small"
+    },
+    "depth_estimator_id": "Intel/dpt-hybrid-midas"
+  },
+
+  "domains": {
+    "sketch": {
+      "description": "a black and white sketch",
+      "llm_instructions": "Describe it using monochrome sketch terminology and drawing style elements. Always emphasize black and white, grayscale or monochrome appearance, never a photograph, and do not mention any colors.",
+      "prompt_suffix": "sketch, line drawing, monochrome",
+      "negative_prompt": "vivid, chromatic, tinted, hued, pigmented, dyed, painted colors, painting, waterpaint, detailed, colorful"
+    }
+  },
+
+  "tags": {
+    "max_image_size": 1024,
+    "max_keywords": 2,
+    "min_count": 1,
+    "top_k": null,
+    "attributes": {
+      "style": "What artistic style is this sketch? Answer in 1-2 words (e.g., realistic, cartoon, abstract, technical, gestural).",
+      "medium": "What medium or materials were used to create this sketch? Answer in 1-2 words (e.g., pencil, charcoal, pen, digital).",
+      "line_quality": "What is the dominant line quality? Answer in 1-2 words (e.g., bold lines, fine lines, rough, smooth).",
+      "stroke_style": "Describe the stroke style in 1-2 words (e.g., hatched, crosshatched, continuous, broken, gestural).",
+      "shading": "What shading technique is used? Answer in 1-2 words (e.g., light shading, heavy shading, minimal, detailed).",
+      "composition": "What type of composition is used? Answer in 1-2 words (e.g., centered, asymmetrical, balanced, dynamic).",
+      "perspective": "What perspective technique is used? Answer in 1-2 words (e.g., linear perspective, bird's eye, close-up).",
+      "detail_level": "Describe the level of detail in 1-2 words (e.g., minimal, detailed, rough, refined).",
+      "mood": "What mood does this sketch convey? Answer in 1-2 words (e.g., peaceful, energetic, melancholic, joyful).",
+      "background": "Describe the background in 1-2 words (e.g., landscape, plain, detailed, abstract)."
+    }
+  },
+
+  "finetune": {
+    "_comment": "LoRA finetuning of the SDXL U-Net on the 1% target subset. Hyperparameters are placeholders: set them to the values used in the paper.",
+    "caption_mode": "vlm",
+    "caption_length": "short",
+    "caption_dropout": 0.0,
+    "resolution": 1024,
+    "center_crop": true,
+    "random_flip": true,
+    "train_batch_size": 4,
+    "gradient_accumulation_steps": 1,
+    "max_train_steps": 1000,
+    "learning_rate": 1e-4,
+    "lr_scheduler": "constant",
+    "lr_warmup_steps": 0,
+    "weight_decay": 0.01,
+    "max_grad_norm": 1.0,
+    "lora_rank": 16,
+    "lora_alpha": 16,
+    "lora_target_modules": ["to_k", "to_q", "to_v", "to_out.0"],
+    "mixed_precision": "fp16",
+    "gradient_checkpointing": false,
+    "checkpoint_steps": 250,
+    "num_workers": 4
+  },
+
+  "convert": {
+    "_comment": "classes: null converts every class in source_dir; use a list such as [\"syringe\"] to restrict.",
+    "classes": null,
+    "caption_length": "short",
+    "include_class_name": false,
+    "num_images_per_source": 1,
+    "llm_max_new_tokens": 256,
+    "max_prompt_words": 60,
+    "reuse_prompts": true,
+    "overwrite": false,
+    "resolution": 1024,
+    "control_types": ["canny"],
+    "controlnet_conditioning_scale": [0.5],
+    "canny_low_threshold": 100,
+    "canny_high_threshold": 200,
+    "init_from_source": false,
+    "strength": 0.9,
+    "num_inference_steps": 50,
+    "guidance_scale": 5.0,
+    "use_finetuned": true,
+    "lora_scale": 1.0,
+    "cpu_offload": true,
+    "negative_prompt": "painting image, blurry, low quality, distorted, ugly, grainy"
+  }
+}
